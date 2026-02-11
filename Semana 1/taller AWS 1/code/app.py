@@ -13,24 +13,24 @@ app = dash.Dash(
     __name__,
     meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}],
 )
-app.title = "Dashboard energia"
+app.title = "Dashboard energía"
 
 server = app.server
 app.config.suppress_callback_exceptions = True
 
 
-# Load data from csv
+# Cargar datos desde csv
 def load_data():
-    # To do: Completar la funciÃ³n
+    # Función para cargar y preparar los datos
     df = pd.read_csv('./datos_energia.csv')
     
     df['time'] = pd.to_datetime(df['time'])
 
     df.set_index('time', inplace=True)
 
-    return  df
+    return df
 
-# Cargar datos
+# Cargar datos globalmente
 data = load_data()
 
 # Graficar serie
@@ -39,14 +39,14 @@ def plot_series(data, initial_date, proy):
     data_plot = data_plot[:-(120-proy)]
     fig = go.Figure([
         go.Scatter(
-            name='Demanda energÃ©tica',
+            name='Demanda energética',
             x=data_plot.index,
             y=data_plot['AT_load_actual_entsoe_transparency'],
             mode='lines',
             line=dict(color="#188463"),
         ),
         go.Scatter(
-            name='ProyecciÃ³n',
+            name='Proyección',
             x=data_plot.index,
             y=data_plot['forecast'],
             mode='lines',
@@ -86,7 +86,7 @@ def plot_series(data, initial_date, proy):
         #title='Continuous, variable value error bars',
         hovermode="x"
     )
-    #fig = px.line(data2, x='local_timestamp', y="Demanda total [MW]", markers=True, labels={"local_timestamp": "Fecha"})
+    
     fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color="#2cfec1")
     fig.update_xaxes(showgrid=True, gridwidth=0.25, gridcolor='#7C7C7C')
     fig.update_yaxes(showgrid=True, gridwidth=0.25, gridcolor='#7C7C7C')
@@ -98,16 +98,15 @@ def plot_series(data, initial_date, proy):
 
 def description_card():
     """
-    :return: A Div containing dashboard title & descriptions.
+    :return: Un Div que contiene el título y la descripción del dashboard.
     """
     return html.Div(
         id="description-card",
         children=[
-            #html.H5("Proyecto 1"),
-            html.H3("PronÃ³stico de producciÃ³n energÃ©tica"),
+            html.H3("Pronóstico de producción energética"),
             html.Div(
                 id="intro",
-                children="Esta herramienta contiene informaciÃ³n sobre la demanda energÃ©tica total en Austria cada hora segÃºn lo pÃºblicado en ENTSO-E Data Portal. Adicionalmente, permite realizar pronÃ³sticos hasta 5 dias en el futuro."
+                children="Esta herramienta contiene información sobre la demanda energética total en Austria cada hora según lo publicado en ENTSO-E Data Portal. Adicionalmente, permite realizar pronósticos hasta 5 días en el futuro."
             ),
         ],
     )
@@ -115,7 +114,7 @@ def description_card():
 
 def generate_control_card():
     """
-    :return: A Div containing controls for graphs.
+    :return: Un Div que contiene los controles para las gráficas.
     """
     return html.Div(
         id="control-card",
@@ -161,7 +160,7 @@ def generate_control_card():
 
             html.Br(),
 
-            # Slider proyecciÃ³n
+            # Slider proyección
             html.Div(
                 id="campo-slider",
                 children=[
@@ -186,7 +185,7 @@ app.layout = html.Div(
     id="app-container",
     children=[
         
-        # Left column
+        # Columna izquierda
         html.Div(
             id="left-column",
             className="four columns",
@@ -198,25 +197,23 @@ app.layout = html.Div(
             ],
         ),
         
-        # Right column
+        # Columna derecha
         html.Div(
             id="right-column",
             className="eight columns",
             children=[
 
-
-                # Grafica de la serie de tiempo
+                # Gráfica de la serie de tiempo
                 html.Div(
                     id="model_graph",
                     children=[
-                        html.B("Demanda energÃ©tica total en Austria [MW]"),
+                        html.B("Demanda energética total en Austria [MW]"),
                         html.Hr(),
                         dcc.Graph(
                             id="plot_series",  
                         )
                     ],
                 ),
-
             
             ],
         ),
@@ -232,7 +229,7 @@ app.layout = html.Div(
 )
 def update_output_div(date, hour, proy):
 
-    if ((date is not None) & (hour is not None) & (proy is not None)):
+    if ((date is not None) and (hour is not None) and (proy is not None)):
         hour = str(hour)
         minute = str(0)
 
@@ -244,6 +241,6 @@ def update_output_div(date, hour, proy):
         return plot
 
 
-# Run the server
+# Ejecutar el servidor
 if __name__ == "__main__":
     app.run(debug=True)
