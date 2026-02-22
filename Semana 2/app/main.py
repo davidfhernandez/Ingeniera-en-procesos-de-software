@@ -1,7 +1,12 @@
 import os
-from flask import Flask, request, render_template, session, redirect
+from dotenv import load_dotenv
+
+load_dotenv()
+
+from flask import Flask, request, render_template, session, redirect, jsonify
 import pandas as pd
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import base64
@@ -16,7 +21,7 @@ from text_utils import (
     es_solo_simbolos,
     es_texto_basura,
     tiene_palabras_validas,
-    PALABRAS_GENERICAS
+    PALABRAS_GENERICAS,
 )
 
 # ==============================
@@ -33,13 +38,18 @@ ALLOWED_DOMAIN = "gmail.com"  # Cambia esto por tu dominio de Workspace si es ne
 # VALIDAR TOKEN GOOGLE
 # ==============================
 
+
 def verify_google_token(token):
     try:
         idinfo = id_token.verify_oauth2_token(
-            token,
-            grequests.Request(),
-            GOOGLE_CLIENT_ID
+            token, grequests.Request(), GOOGLE_CLIENT_ID, clock_skew_in_seconds=10
         )
+
+        # --- DEBUG: Imprime esto para ver qué llega de Google ---
+        print("DEBUG: Token verificado con éxito.", flush=True)
+        print(f"DEBUG: Email del usuario: {idinfo.get('email')}", flush=True)
+        print(f"DEBUG: Hosted Domain (hd): {idinfo.get('hd')}", flush=True)
+        print(f"DEBUG: ALLOWED_DOMAIN configurado: {ALLOWED_DOMAIN}", flush=True)
 
         # Validar dominio Workspace
         if idinfo.get("hd") != ALLOWED_DOMAIN:
@@ -67,11 +77,30 @@ def login():
         session["user"] = {
             "name": user_info.get("name"),
             "email": user_info.get("email"),
-            "picture": user_info.get("picture")
+            "picture": user_info.get("picture"),
         }
         return {"status": "success"}
     else:
         return {"status": "unauthorized"}, 401
+
+    # data = request.get_json()
+    # credential = data.get('credential')
+
+    # try:
+    #     # Aquí es donde ocurre la magia: Python verifica con Google que el login es real
+    #     idinfo = id_token.verify_oauth2_token(credential, grequests.Request(), GOOGLE_CLIENT_ID)
+
+    #     # Guarda el usuario en la sesión
+    #     session['user'] = {
+    #         'name': idinfo['name'],
+    #         'email': idinfo['email']
+    #     }
+    #     return jsonify({"status": "success"})
+
+    # except ValueError:
+    #     # SI FALLA LA VERIFICACIÓN (Llave incorrecta o token inválido), devuleve error
+    #     # Y esto es lo que hace que tu HTML muestre el alert("No autorizado")
+    #     return jsonify({"status": "error", "message": "Token inválido"}), 401
 
 
 @app.route("/logout")
@@ -84,15 +113,14 @@ def logout():
 # RUTA PRINCIPAL
 # ==============================
 
+
 @app.route("/", methods=["GET", "POST"])
 def analizar_estados():
 
     # GET → Mostrar login o formulario
     if request.method == "GET":
         return render_template(
-            "index.html",
-            client_id=GOOGLE_CLIENT_ID,
-            user=session.get("user")
+            "index.html", client_id=GOOGLE_CLIENT_ID, user=session.get("user")
         )
 
     # POST → Validar sesión
@@ -114,32 +142,26 @@ def analizar_estados():
 
     sentimientos = serie.apply(analizar_sentimiento)
 
-    resultado_df = pd.DataFrame({
-        "comentario": serie.values,
-        "sentimiento": sentimientos.values
-    })
+    resultado_df = pd.DataFrame(
+        {"comentario": serie.values, "sentimiento": sentimientos.values}
+    )
 
     conteo = resultado_df["sentimiento"].value_counts()
     total = conteo.sum()
     porcentajes = (conteo / total * 100).round(1)
 
-    colores = {
-        "Positivo": "#4CAF50",
-        "Neutral": "#BDBDBD",
-        "Negativo": "#E53935"
-    }
+    colores = {"Positivo": "#4CAF50", "Neutral": "#BDBDBD", "Negativo": "#E53935"}
 
     fig, ax = plt.subplots(figsize=(8, 5))
-    bars = ax.bar(conteo.index, conteo.values,
-                  color=[colores[i] for i in conteo.index])
+    bars = ax.bar(conteo.index, conteo.values, color=[colores[i] for i in conteo.index])
 
     for bar, p in zip(bars, porcentajes):
         ax.text(
-            bar.get_x() + bar.get_width()/2,
+            bar.get_x() + bar.get_width() / 2,
             bar.get_height() + 0.2,
             f"{p}%",
             ha="center",
-            weight="bold"
+            weight="bold",
         )
 
     img = BytesIO()
@@ -158,7 +180,7 @@ def analizar_estados():
         total=total,
         grafico=grafico,
         excel=excel_b64,
-        user=session.get("user")
+        user=session.get("user"),
     )
 
 
@@ -167,4 +189,4 @@ def analizar_estados():
 # ==============================
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)), debug=True)
