@@ -20,6 +20,8 @@ repo: https://github.com/davidfhernandez/tmp-ing-procesos-gcp
 
 
 ### Fix
+https://github.com/davidfhernandez/sentiment-analysis-w2
+
 URL: https://sentiment-analysis-894994786500.us-east1.run.app
 
 ![1771973170146](image/Entrega/1771973170146.png)
