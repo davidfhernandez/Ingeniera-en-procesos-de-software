@@ -17,3 +17,11 @@ repo: https://github.com/davidfhernandez/tmp-ing-procesos-gcp
 ### Error
 
 ![app flow 4 - ERROR](image/Entrega/1771731149807.png)
+
+
+### Fix
+URL: https://sentiment-analysis-894994786500.us-east1.run.app
+
+![1771973170146](image/Entrega/1771973170146.png)
+
+![1771973882679](image/Entrega/1771973882679.png)
