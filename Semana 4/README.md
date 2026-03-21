@@ -7,7 +7,7 @@
 ### Video de funcionamiento
 
 <video width="100%" height="250" controls>
-  <source src="image/README/1774104683045.mp4" type="video/mp4">
+  <source src="./image/README/1774104683045.mp4" type="video/mp4">
   Tu navegador no soporta el elemento video.
 </video>
 
