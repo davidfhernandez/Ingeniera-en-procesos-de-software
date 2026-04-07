@@ -365,3 +365,5 @@ El sistema será aceptado cuando:
 Creado en figma.
 
 https://www.figma.com/make/suOcOXa0JMmTgTb2hztybA/Restaurant-E-commerce-Website?t=tEyXeX6zWHwVeNeR-1&preview-route=%2Fadmin
+
+live: https://house-stage-10890167.figma.site/
